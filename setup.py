@@ -10,7 +10,8 @@ setup(
     packages=find_packages(),
     python_requires=">=3.7",
     install_requires=[
-        "keyboard==0.13.5"
+        "keyboard==0.13.5",
+        "asyncio==3.4.3",
     ],
     extras_require={
         "quality": [
