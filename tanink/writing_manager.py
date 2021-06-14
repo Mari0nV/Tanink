@@ -25,7 +25,10 @@ class WritingManager:
             self.x_cursor -= width * direction
         
         self._add_diff_box(
-            self.x_cursor, prev_x_cursor, self.y_cursor, self.y_cursor + height
+            min(self.x_cursor, prev_x_cursor),
+            max(self.x_cursor, prev_x_cursor),
+            min(self.y_cursor, self.y_cursor + height),
+            max(self.y_cursor, self.y_cursor + height),
         )
 
     def _add_diff_box(self, min_x, max_x, min_y, max_y, round_to=4):
@@ -38,8 +41,19 @@ class WritingManager:
             (min_x, min_y, max_x, max_y)
         )
 
-    def get_diff_box(self):
-        return self.diff_boxes[-1]
+    def get_diff_box(self, size=None):
+        if size is None:
+            return self.diff_boxes[-1]
+        else:
+            min_x = min([box[0] for box in self.diff_boxes[-size:]])
+            min_y = min([box[1] for box in self.diff_boxes[-size:]])
+            max_x = max([box[2] for box in self.diff_boxes[-size:]])
+            max_y = max([box[3] for box in self.diff_boxes[-size:]])
+            return (min_x, min_y, max_x, max_y)
 
     def pop_diff_box(self):
-        self.diff_boxes.pop()
+        if self.diff_boxes:
+            width = self.diff_boxes[-1][2] - self.diff_boxes[-1][0]
+            height = self.diff_boxes[-1][3] - self.diff_boxes[-1][1]
+            self.diff_boxes.pop()
+            self.move_cursors(width, height, direction=-1)
