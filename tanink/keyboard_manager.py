@@ -21,7 +21,9 @@ class KeyboardManager:
     def handle_special(self, name):
         try:
             getattr(self, f'_{name}')()
-        except Exception:
+        except Exception as e:
+            import pdb; pdb.set_trace()
+            print(e)
             print("No method implemented for", name)
 
     def _backspace(self):

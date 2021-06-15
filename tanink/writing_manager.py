@@ -50,14 +50,15 @@ class WritingManager:
                 self.x_cursor = self.diff_boxes[-2][0]
 
     def get_diff_box(self, size=None):
-        if size is None:
-            return self.diff_boxes[-1]
-        else:
-            min_x = min([box[0] for box in self.diff_boxes[-size:]])
-            min_y = min([box[1] for box in self.diff_boxes[-size:]])
-            max_x = max([box[2] for box in self.diff_boxes[-size:]])
-            max_y = max([box[3] for box in self.diff_boxes[-size:]])
-            return (min_x, min_y, max_x, max_y)
+        if self.diff_boxes:
+            if size is None:
+                return self.diff_boxes[-1]
+            else:
+                min_x = min([box[0] for box in self.diff_boxes[-size:]])
+                min_y = min([box[1] for box in self.diff_boxes[-size:]])
+                max_x = max([box[2] for box in self.diff_boxes[-size:]])
+                max_y = max([box[3] for box in self.diff_boxes[-size:]])
+                return (min_x, min_y, max_x, max_y)
 
     def pop_diff_box(self):
         if self.diff_boxes:

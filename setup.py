@@ -18,6 +18,7 @@ setup(
     extras_require={
         "quality": [
             "pytest==6.2.4",
+            "pytest-mock==3.6.1",
             "flake8==3.9.2",
         ]
     },

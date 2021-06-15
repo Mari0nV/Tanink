@@ -1,5 +1,6 @@
 import pytest
 
+from tanink.display_manager import DisplayManager
 from tanink.writing_manager import WritingManager
 
 
@@ -14,5 +15,18 @@ def writing_manager():
     manager.text_spacing = 0
     manager.x_cursor = 108
     manager.y_cursor = 8
+
+    return manager
+
+
+@pytest.fixture
+def display_manager(mocker, writing_manager):
+    display = mocker.Mock()
+    manager = DisplayManager(
+        display=display,
+        writing_manager=writing_manager
+    )
+    manager.font_path = '/usr/share/fonts/truetype/freefont/FreeSans.ttf'
+    manager.font_size = 30
 
     return manager
