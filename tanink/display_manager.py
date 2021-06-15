@@ -36,7 +36,9 @@ class DisplayManager:
         diff_box = self.writing_manager.get_diff_box()
         box_width = diff_box[2] - diff_box[0]
         box_height = diff_box[3] - diff_box[1]
-        print("diff boxes", self.writing_manager.diff_boxes)
+        print("diff_box", diff_box)
+        print("x_cursor", self.writing_manager.x_cursor)
+        print("y_cursor", self.writing_manager.y_cursor)
         draw_x = self.writing_manager.x_cursor
         draw_y = self.writing_manager.y_cursor
         self.writing_manager.pop_diff_box()

@@ -8,6 +8,7 @@ from tanink.writing_manager import WritingManager
 
 async def keyboard_events(display_manager):
     keyboard_manager = KeyboardManager(display_manager)
+    print("in keyboard events")
     while True:
         keyboard_manager.check_key_pressed()
         await asyncio.sleep(0.1)
