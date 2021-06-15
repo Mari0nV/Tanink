@@ -1,18 +1,16 @@
+import asyncio
 from IT8951.display import AutoEPDDisplay
 
-from tanink.writing_manager import WritingManager
 from tanink.display_manager import DisplayManager
-import asyncio
+from tanink.keyboard_manager import KeyboardManager
+from tanink.writing_manager import WritingManager
 
 
 async def keyboard_events(display_manager):
-    await asyncio.sleep(1)
-    display_manager.draw_written_text('a')
-    display_manager.draw_written_text('a')
-    await asyncio.sleep(1)
-    display_manager.erase_last_written_text()
-    display_manager.erase_last_written_text()
-    display_manager.draw_written_text('b')
+    keyboard_manager = KeyboardManager(display_manager)
+    while True:
+        keyboard_manager.check_key_pressed()
+        await asyncio.sleep(0.1)
 
 
 async def tasks(loop):
@@ -27,6 +25,7 @@ async def tasks(loop):
 
     # Display writing box
     await asyncio.create_task(display_manager.draw_writing_box())
+
     keyboard = loop.create_task(keyboard_events(display_manager))
     update = loop.create_task(display_manager.draw_buffer())
 
