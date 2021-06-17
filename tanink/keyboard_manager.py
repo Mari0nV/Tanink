@@ -1,6 +1,5 @@
 import keyboard
 from queue import Queue
-import re
 
 
 class KeyboardManager:
@@ -8,22 +7,22 @@ class KeyboardManager:
         self.display_manager = display_manager
         self.events = Queue()
         keyboard.start_recording(self.events)
-
+ 
     def check_key_pressed(self):
         while not self.events.empty():
             key = self.events.get_nowait()
+            print(key.scan_code, key.name)
             if key.event_type == 'down':
-                if re.match('^[\w,.:;-\\\(\\\?\\\/]{1}$', key.name):
-                    self.display_manager.draw_written_text(key.name)
-                else:
+                if key.name in ['space', 'backspace', 'caps lock', 'unknown', 'tab']:
                     self.handle_special(key.name)
+                elif not keyboard.is_modifier(key.name):
+                    self.display_manager.draw_written_text(key.name)
+                    
     
     def handle_special(self, name):
         try:
             getattr(self, f'_{name}')()
-        except Exception as e:
-            import pdb; pdb.set_trace()
-            print(e)
+        except AttributeError as e:
             print("No method implemented for", name)
 
     def _backspace(self):
@@ -31,3 +30,4 @@ class KeyboardManager:
 
     def _space(self):
         self.display_manager.draw_written_text(' ')
+
