@@ -1,15 +1,19 @@
 import pytest
 
 
-@pytest.mark.parametrize('curr_x, curr_y, w, h, direction, exp_x, exp_y, init_diff_boxes, diff_boxes', [
-    (108, 8, 30, 30, 1, 76, 8, [], [(76, 8, 108, 40)]),
-    (76, 8, 30, 30, -1, 108, 8, [(76, 8, 108, 40)], [(76, 8, 108, 40)]),
-    (8, 8, 30, 30, 1, 76, 40, [], [(76, 40, 108, 72)]),
-    (76, 40, 30, 30, -1, 108, 40, [(76, 40, 108, 72)], [(76, 40, 108, 72)]),
+@pytest.mark.parametrize('transpose, curr_x, curr_y, w, h, direction, exp_x, exp_y, init_diff_boxes, diff_boxes', [
+    (True, 108, 8, 30, 30, 1, 76, 8, [], [(76, 8, 108, 40)]),  # add box on same row
+    (True, 76, 8, 30, 30, -1, 108, 8, [(76, 8, 108, 40)], [(76, 8, 108, 40)]),  # remove box on same row
+    (True, 8, 8, 30, 30, 1, 76, 40, [], [(76, 40, 108, 72)]),  # add box on next row
+    (True, 76, 40, 30, 30, -1, 108, 40, [(76, 40, 108, 72)], [(76, 40, 108, 72)]),  # remove first box of second row
+    (False, 8, 8, 30, 30, 1, 40, 8, [], [(8, 8, 40, 40)]),  # add box on same row (no transpose)
+    (False, 40, 8, 30, 30, -1, 8, 8, [(8, 8, 40, 40)], [(8, 8, 40, 40)]),  # remove box on same row (no transpose)
+
 ])
 def test_move_cursor(
-    writing_manager, curr_x, curr_y, w, h, direction, exp_x, exp_y, init_diff_boxes, diff_boxes
+    writing_manager, transpose, curr_x, curr_y, w, h, direction, exp_x, exp_y, init_diff_boxes, diff_boxes
 ):
+    writing_manager.transpose = transpose
     writing_manager.x_cursor = curr_x
     writing_manager.y_cursor = curr_y
     writing_manager.diff_boxes = init_diff_boxes

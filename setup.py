@@ -13,7 +13,7 @@ setup(
         "keyboard==0.13.5",
         "asyncio==3.4.3",
         "pillow==8.2.0",
-        "epd-library==0.2.3",
+        # "epd-library==0.2.3",
     ],
     extras_require={
         "quality": [

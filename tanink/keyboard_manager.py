@@ -17,7 +17,6 @@ class KeyboardManager:
                     self.handle_special(key.name)
                 elif not keyboard.is_modifier(key.name):
                     self.display_manager.draw_written_text(key.name)
-                    
     
     def handle_special(self, name):
         try:

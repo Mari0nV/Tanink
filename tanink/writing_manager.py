@@ -2,16 +2,22 @@ import config as cfg
 
 
 class WritingManager:
-    def __init__(self):
-        self.writing_rect_x = cfg.WRITING_RECT_X
-        self.writing_rect_y = cfg.WRITING_RECT_Y
-        self.writing_rect_width = cfg.WRITING_RECT_WIDTH
-        self.writing_rect_height = cfg.WRITING_RECT_HEIGHT
-        self.writing_rect_margin = cfg.WRITING_RECT_MARGIN
+    def __init__(self, transpose=cfg.TRANSPOSE):
+        self.transpose = transpose
+        self.rect_x = cfg.WRITING_RECT_X
+        self.rect_y = cfg.WRITING_RECT_Y
+        self.rect_width = cfg.WRITING_RECT_WIDTH
+        self.rect_height = cfg.WRITING_RECT_HEIGHT
+        self.rect_margin = cfg.WRITING_RECT_MARGIN
         self.text_spacing = cfg.TEXT_SPACING
 
-        self.x_cursor = self.writing_rect_x + self.writing_rect_width - self.writing_rect_margin
-        self.y_cursor = self.writing_rect_y + self.writing_rect_margin
+        if self.transpose:
+            self.x_cursor = self.rect_x + self.rect_width - self.rect_margin
+        else:
+            self.x_cursor = self.rect_x + self.rect_margin
+        self.y_cursor = self.rect_y + self.rect_margin
+        self.prev_x_cursor = self.x_cursor
+        self.prev_y_cursor = self.y_cursor
         self.diff_boxes = []
     
     def move_cursors(self, width, height, direction=1, round_to=4):
@@ -23,31 +29,42 @@ class WritingManager:
         width += round_to - 1 - (width - 1) % round_to
         height += round_to - 1 - (height - 1) % round_to
 
-        prev_x_cursor = self.x_cursor
-        prev_y_cursor = self.y_cursor
+        self.prev_x_cursor = self.x_cursor
+        self.prev_y_cursor = self.y_cursor
         if direction == 1:  # display a new box on screen
             # there is space on the screen row to display a new box
-            if self.x_cursor - self.writing_rect_x >= width:
+            if self.transpose and self.x_cursor - self.rect_x >= width + self.rect_margin:
                 self.x_cursor -= width
+            elif not self.transpose and self.x_cursor + width + self.rect_margin <= self.rect_x + self.rect_width:
+                self.x_cursor += width
             # we need to display the box on a new row
             else:
                 self.y_cursor += height + self.text_spacing
-                prev_x_cursor = self.writing_rect_x + self.writing_rect_width - self.writing_rect_margin
-                self.x_cursor = prev_x_cursor - width
+                if self.transpose:
+                    self.prev_x_cursor = self.rect_x + self.rect_width - self.rect_margin
+                    self.x_cursor = self.prev_x_cursor - width
+                else:
+                    self.prev_x_cursor = self.rect_x + self.rect_margin
+                    self.x_cursor = self.prev_x_cursor + width
             self.diff_boxes.append((
-                min(self.x_cursor, prev_x_cursor),
+                min(self.x_cursor, self.prev_x_cursor),
                 min(self.y_cursor, self.y_cursor + height),
-                max(self.x_cursor, prev_x_cursor),
+                max(self.x_cursor, self.prev_x_cursor),
                 max(self.y_cursor, self.y_cursor + height),
             ))
         elif self.diff_boxes:  # user wants to go back
             # there is space to go back staying on the same row
-            if self.writing_rect_x + self.writing_rect_width - self.writing_rect_margin - self.x_cursor >= width:
+            if self.transpose and self.rect_x + self.rect_width - self.rect_margin - self.x_cursor >= width:
                 self.x_cursor += width
+            elif not self.transpose and self.x_cursor - width >= self.rect_x + self.rect_margin:
+                self.x_cursor -= width
             # we need to go back on last row
-            elif self.y_cursor > self.writing_rect_y + self.writing_rect_margin:
+            elif self.y_cursor > self.rect_y + self.rect_margin:
                 self.y_cursor -= (height + self.text_spacing)
-                self.x_cursor = self.diff_boxes[-2][0]
+                if self.transpose:
+                    self.x_cursor = self.diff_boxes[-2][0]
+                else:
+                    self.x_cursor = self.diff_boxes[-2][2]
 
     def get_diff_box(self, size=None):
         if self.diff_boxes:

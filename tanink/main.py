@@ -1,5 +1,5 @@
 import asyncio
-from IT8951.display import AutoEPDDisplay
+from IT8951.display import VirtualEPDDisplay
 
 from tanink.display_manager import DisplayManager
 from tanink.keyboard_manager import KeyboardManager
@@ -14,7 +14,7 @@ async def keyboard_events(display_manager):
 
 
 async def tasks(loop):
-    display = AutoEPDDisplay(vcom=-2.36, rotate=None, spi_hz=24000000)
+    display = VirtualEPDDisplay(dims=(1872, 1404))
     await asyncio.create_task(display.clear())
 
     writing_manager = WritingManager()

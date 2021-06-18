@@ -13,6 +13,7 @@ class DisplayManager:
         self.diff_boxes_to_erase = []
         self.font_path = cfg.FONTPATH
         self.font_size = cfg.FONTSIZE
+        self.transpose = cfg.TRANSPOSE
 
     def _place_written_text(self, text):
         """ Place written text
@@ -22,13 +23,20 @@ class DisplayManager:
         text_height = self.font_size
 
         self.writing_manager.move_cursors(text_width, text_height)
-        draw_x = self.writing_manager.x_cursor
-        draw_y = self.writing_manager.y_cursor
-
+        if self.transpose:
+            # drawing box starts at cursors after they move
+            draw_x = self.writing_manager.x_cursor
+            draw_y = self.writing_manager.y_cursor
+        else:
+            # drawing box starts at cursors before they move
+            draw_x = self.writing_manager.prev_x_cursor
+            draw_y = self.writing_manager.prev_y_cursor
+    
         img = Image.new('L', (text_width, text_height), "#ffffff")
         draw = ImageDraw.Draw(img)
         draw.text((0, 0), text, "#000", font=font)
-        img = img.transpose(Image.FLIP_LEFT_RIGHT)
+        if self.transpose:
+            img = img.transpose(Image.FLIP_LEFT_RIGHT)
 
         self.display.frame_buf.paste(img, (draw_x, draw_y))
 
@@ -39,12 +47,16 @@ class DisplayManager:
         if diff_box:
             box_width = diff_box[2] - diff_box[0]
             box_height = diff_box[3] - diff_box[1]
-            print("diff_box", diff_box)
-            print("x_cursor", self.writing_manager.x_cursor)
-            print("y_cursor", self.writing_manager.y_cursor)
-            draw_x = self.writing_manager.x_cursor
-            draw_y = self.writing_manager.y_cursor
             self.writing_manager.pop_diff_box()
+            if self.transpose:
+                # drawing box starts at cursors before they move
+                draw_x = self.writing_manager.prev_x_cursor
+                draw_y = self.writing_manager.prev_y_cursor
+            else:
+                # drawing box starts at cursors after they move
+                draw_x = self.writing_manager.x_cursor
+                draw_y = self.writing_manager.y_cursor
+
 
             img = Image.new('L', (box_width, box_height), "#ffffff")
             self.display.frame_buf.paste(img, (draw_x, draw_y))
@@ -85,6 +97,7 @@ class DisplayManager:
                 text = ''.join(self.writing_buffer)
                 self.writing_buffer = []
 
+                print("before draw partial")
                 await self.display.draw_partial(
                     constants.DisplayModes.DU,
                     diff_box=self.writing_manager.get_diff_box(
