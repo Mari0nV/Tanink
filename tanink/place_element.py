@@ -10,6 +10,7 @@ class PlaceElement:
         - blank text box (for when text is erased)
         - writing box (big rectangle box)
     """
+
     def __init__(self, display, writing_manager):
         self.display = display
         self.writing_manager = writing_manager
@@ -62,9 +63,11 @@ class PlaceElement:
                     last_word_width = self.font.getsize(self.last_word)
                     self.place_blank_text_box(last_word_width)
                     total_width = self.font.getsize(self.last_word + text)
-                    self.writing_manager.move_cursors(total_width, self.font_size, new_row=True)
+                    self.writing_manager.move_cursors(
+                        total_width, self.font_size, new_row=True)
                     draw_x, draw_y = self._compute_drawing_box(total_width)
-                    img = self._create_image(total_width, self.font_size, self.last_word + text)
+                    img = self._create_image(
+                        total_width, self.font_size, self.last_word + text)
                     self.display.frame_buf.paste(img, (draw_x, draw_y))
 
     def _compute_drawing_box(self, width=None, forward=True):
@@ -82,7 +85,7 @@ class PlaceElement:
             else:
                 # drawing box starts at cursors after they move
                 draw_x, draw_y = self.writing_manager.get_cursors()
-        
+
         return draw_x, draw_y
 
     def _create_image(self, width, height, text=None):
@@ -142,8 +145,8 @@ class PlaceElement:
         w, h = cfg.WRITING_RECT_WIDTH, cfg.WRITING_RECT_HEIGHT
         shape = [(0, 0), (w, h)]
         img = Image.new("L", (w, h))
-        img1 = ImageDraw.Draw(img)  
-        img1.rectangle(shape, fill ="#ffffff", outline ="grey", width=5)
-        
+        img1 = ImageDraw.Draw(img)
+        img1.rectangle(shape, fill="#ffffff", outline="grey", width=5)
+
         paste_coords = [cfg.WRITING_RECT_X, cfg.WRITING_RECT_Y]
         self.display.frame_buf.paste(img, paste_coords)
