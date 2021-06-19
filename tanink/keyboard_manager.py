@@ -2,7 +2,16 @@ import keyboard
 from queue import Queue
 
 
+special_keys = [
+    'space', 'backspace', 'caps lock', 'unknown', 'tab', 'maj', 'decimal', 'enter', 'verr.maj',
+    'ctrl droite', 'windows gauche'
+]
+
 class KeyboardManager:
+    """ Manage keyboard input. 
+        Associate each key pressed with its corresponding action,
+        like writing a character or erasing it.
+    """
     def __init__(self, display_manager):
         self.display_manager = display_manager
         self.events = Queue()
@@ -11,9 +20,8 @@ class KeyboardManager:
     def check_key_pressed(self):
         while not self.events.empty():
             key = self.events.get_nowait()
-            print(key.scan_code, key.name)
             if key.event_type == 'down':
-                if key.name in ['space', 'backspace', 'caps lock', 'unknown', 'tab']:
+                if key.name in special_keys:
                     self.handle_special(key.name)
                 elif not keyboard.is_modifier(key.name):
                     self.display_manager.draw_written_text(key.name)
