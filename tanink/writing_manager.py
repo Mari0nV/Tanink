@@ -2,6 +2,10 @@ import config as cfg
 
 
 class WritingManager:
+    """ Manage x and y cursors in writing box, when adding or removing text.
+        Save computed diff boxes in a list, to have memory of where text has been
+        written.
+    """
     def __init__(self, transpose=cfg.TRANSPOSE):
         self.transpose = transpose
         self.rect_x = cfg.WRITING_RECT_X
@@ -33,10 +37,8 @@ class WritingManager:
         self.prev_y_cursor = self.y_cursor
         if direction == 1:  # display a new box on screen
             # there is space on the screen row to display a new box
-            if self.transpose and self.x_cursor - self.rect_x >= width + self.rect_margin:
-                self.x_cursor -= width
-            elif not self.transpose and self.x_cursor + width + self.rect_margin <= self.rect_x + self.rect_width:
-                self.x_cursor += width
+            if not self.no_more_space(width):
+                self.x_cursor += width * (-1)**int(self.transpose)
             # we need to display the box on a new row
             else:
                 self.y_cursor += height + self.text_spacing
@@ -65,6 +67,22 @@ class WritingManager:
                     self.x_cursor = self.diff_boxes[-2][0]
                 else:
                     self.x_cursor = self.diff_boxes[-2][2]
+
+    def get_cursors(self):
+        return self.x_cursor, self.y_cursor
+    
+    def get_prev_cursors(self):
+        return self.prev_x_cursor, self.prev_y_cursor
+
+    def no_more_space(self, width):
+        """ Return True if there is no space on the row for a box with specific width.
+        """
+        if self.transpose and self.x_cursor - self.rect_x >= width + self.rect_margin:
+            return False
+        elif not self.transpose and self.x_cursor + width + self.rect_margin <= self.rect_x + self.rect_width:
+            return False
+
+        return True
 
     def get_diff_box(self, size=None):
         if self.diff_boxes:

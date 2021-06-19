@@ -1,7 +1,9 @@
+from PIL import ImageFont
 import pytest
 import os
 
 from tanink.display_manager import DisplayManager
+from tanink.place_element import PlaceElement
 from tanink.writing_manager import WritingManager
 import config as cfg
 
@@ -22,18 +24,29 @@ def writing_manager():
 
 
 @pytest.fixture
-def display_manager(mocker, writing_manager):
+def place_element(mocker, writing_manager):
     display = mocker.Mock()
-    manager = DisplayManager(
+    place = PlaceElement(
         display=display,
         writing_manager=writing_manager
     )
-    manager.font_path = os.path.join(
+    font_path = os.path.join(
         os.path.dirname(__file__),
         'assets',
         'FreeSans.ttf'
     )
-    manager.font_size = 30
-    manager.transpose = True
+    place.font_size = 30
+    place.font = ImageFont.truetype(font_path, place.font_size)
+    place.transpose = True
+    return place
 
+
+@pytest.fixture
+def display_manager(mocker, place_element):
+    display = mocker.Mock()
+    manager = DisplayManager(
+        display=display,
+        writing_manager=place_element.writing_manager
+    )
+    manager.place = place_element
     return manager
