@@ -24,7 +24,7 @@ class WritingManager:
         self.prev_y_cursor = self.y_cursor
         self.diff_boxes = []
     
-    def move_cursors(self, width, height, direction=1, round_to=4):
+    def move_cursors(self, width, height, direction=1, round_to=4, new_row=False):
         """ Move x and y cursors according to the dimensions of the new box.
             Add the new box into the list of diff boxes if direction is not -1.
             (direction = -1 if it's a box to erase)
@@ -36,11 +36,8 @@ class WritingManager:
         self.prev_x_cursor = self.x_cursor
         self.prev_y_cursor = self.y_cursor
         if direction == 1:  # display a new box on screen
-            # there is space on the screen row to display a new box
-            if not self.no_more_space(width):
-                self.x_cursor += width * (-1)**int(self.transpose)
             # we need to display the box on a new row
-            else:
+            if self.no_more_space(width) or new_row:
                 self.y_cursor += height + self.text_spacing
                 if self.transpose:
                     self.prev_x_cursor = self.rect_x + self.rect_width - self.rect_margin
@@ -48,6 +45,9 @@ class WritingManager:
                 else:
                     self.prev_x_cursor = self.rect_x + self.rect_margin
                     self.x_cursor = self.prev_x_cursor + width
+            # there is space on the screen row to display a new box
+            else:
+                self.x_cursor += width * (-1)**int(self.transpose)
             self.diff_boxes.append((
                 min(self.x_cursor, self.prev_x_cursor),
                 min(self.y_cursor, self.y_cursor + height),

@@ -61,9 +61,11 @@ class PlaceElement:
                     # move the content of last word + text down
                     last_word_width = self.font.getsize(self.last_word)
                     self.place_blank_text_box(last_word_width)
-                    total_width = self.font.getsize(self.last_word + self.text)
+                    total_width = self.font.getsize(self.last_word + text)
                     self.writing_manager.move_cursors(total_width, self.font_size, new_row=True)
                     draw_x, draw_y = self._compute_drawing_box(total_width)
+                    img = self._create_image(total_width, self.font_size, self.last_word + text)
+                    self.display.frame_buf.paste(img, (draw_x, draw_y))
 
     def _compute_drawing_box(self, width=None, forward=True):
         if forward:  # cursor is after the character that has just been added
@@ -83,6 +85,16 @@ class PlaceElement:
         
         return draw_x, draw_y
 
+    def _create_image(self, width, height, text=None):
+        img = Image.new('L', (width, height), "#ffffff")
+        if text is not None:
+            draw = ImageDraw.Draw(img)
+            draw.text((0, 0), text, "#000", font=self.font)
+            if self.transpose:
+                img = img.transpose(Image.FLIP_LEFT_RIGHT)
+
+        return img
+
     def place_written_text(self, text):
         """ Place written text
         """
@@ -96,12 +108,7 @@ class PlaceElement:
         self._update_last_word(text)
         self.writing_manager.move_cursors(text_width, text_height)
         draw_x, draw_y = self._compute_drawing_box()
-    
-        img = Image.new('L', (text_width, text_height), "#ffffff")
-        draw = ImageDraw.Draw(img)
-        draw.text((0, 0), text, "#000", font=self.font)
-        if self.transpose:
-            img = img.transpose(Image.FLIP_LEFT_RIGHT)
+        img = self._create_image(text_width, text_height, text)
 
         self.display.frame_buf.paste(img, (draw_x, draw_y))
 
@@ -124,7 +131,7 @@ class PlaceElement:
                 return
 
         self._update_last_word(nb_box=nb_box)
-        img = Image.new('L', (width, height), "#ffffff")
+        img = self._create_image(width, height)
         self.display.frame_buf.paste(img, (draw_x, draw_y))
 
         return diff_box
