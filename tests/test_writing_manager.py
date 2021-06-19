@@ -3,11 +3,16 @@ import pytest
 
 @pytest.mark.parametrize('transpose, curr_x, curr_y, w, h, direction, exp_x, exp_y, init_diff_boxes, diff_boxes', [
     (True, 108, 8, 30, 30, 1, 76, 8, [], [(76, 8, 108, 40)]),  # add box on same row
-    (True, 76, 8, 30, 30, -1, 108, 8, [(76, 8, 108, 40)], [(76, 8, 108, 40)]),  # remove box on same row
+    # remove box on same row
+    (True, 76, 8, 30, 30, -1, 108, 8, [(76, 8, 108, 40)], [(76, 8, 108, 40)]),
     (True, 8, 8, 30, 30, 1, 76, 40, [], [(76, 40, 108, 72)]),  # add box on next row
-    (True, 76, 40, 30, 30, -1, 108, 40, [(76, 40, 108, 72)], [(76, 40, 108, 72)]),  # remove first box of second row
-    (False, 8, 8, 30, 30, 1, 40, 8, [], [(8, 8, 40, 40)]),  # add box on same row (no transpose)
-    (False, 40, 8, 30, 30, -1, 8, 8, [(8, 8, 40, 40)], [(8, 8, 40, 40)]),  # remove box on same row (no transpose)
+    # remove first box of second row
+    (True, 76, 40, 30, 30, -1, 108, 40,
+     [(76, 40, 108, 72)], [(76, 40, 108, 72)]),
+    # add box on same row (no transpose)
+    (False, 8, 8, 30, 30, 1, 40, 8, [], [(8, 8, 40, 40)]),
+    # remove box on same row (no transpose)
+    (False, 40, 8, 30, 30, -1, 8, 8, [(8, 8, 40, 40)], [(8, 8, 40, 40)]),
 
 ])
 def test_move_cursor(
@@ -133,3 +138,26 @@ def test_corner_cases_on_writing_manager(writing_manager):
     assert writing_manager.x_cursor == 108
     assert writing_manager.y_cursor == 8
     assert writing_manager.diff_boxes == []
+
+
+@pytest.mark.parametrize('width, output, diff_boxes', [
+    (None, 1, [
+        (74, 8, 108, 40),
+        (44, 8, 74, 40)
+    ]),
+    (32, 1, [
+        (74, 8, 108, 40),
+        (44, 8, 74, 40)
+    ]),
+    (62, 2, [(74, 8, 108, 40)]),
+    (96, 3, []),
+])
+def test_pop_diff_box(writing_manager, width, output, diff_boxes):
+    writing_manager.diff_boxes = [
+        (74, 8, 108, 40),
+        (44, 8, 74, 40),
+        (12, 8, 44, 40),
+    ]
+
+    assert writing_manager.pop_diff_box(width) == output
+    assert writing_manager.diff_boxes == diff_boxes

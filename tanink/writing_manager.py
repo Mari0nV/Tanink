@@ -6,6 +6,7 @@ class WritingManager:
         Save computed diff boxes in a list, to have memory of where text has been
         written.
     """
+
     def __init__(self, transpose=cfg.TRANSPOSE):
         self.transpose = transpose
         self.rect_x = cfg.WRITING_RECT_X
@@ -23,7 +24,7 @@ class WritingManager:
         self.prev_x_cursor = self.x_cursor
         self.prev_y_cursor = self.y_cursor
         self.diff_boxes = []
-    
+
     def move_cursors(self, width, height, direction=1, round_to=4, new_row=False):
         """ Move x and y cursors according to the dimensions of the new box.
             Add the new box into the list of diff boxes if direction is not -1.
@@ -70,7 +71,7 @@ class WritingManager:
 
     def get_cursors(self):
         return self.x_cursor, self.y_cursor
-    
+
     def get_prev_cursors(self):
         return self.prev_x_cursor, self.prev_y_cursor
 
@@ -95,9 +96,27 @@ class WritingManager:
                 max_y = max([box[3] for box in self.diff_boxes[-size:]])
                 return (min_x, min_y, max_x, max_y)
 
-    def pop_diff_box(self):
-        if self.diff_boxes:
+    def pop_diff_box(self, width=None) -> int:
+        if width:
+            box_width = 0
+            nb_box = 0
+            while width > box_width:
+                if len(self.diff_boxes) > nb_box:
+                    box_width += self.diff_boxes[-nb_box][2] - \
+                        self.diff_boxes[-nb_box][0]
+                    nb_box += 1
+                else:
+                    break
+            if nb_box:
+                height = self.diff_boxes[-1][3] - self.diff_boxes[-1][1]
+                self.move_cursors(box_width, height, direction=-1)
+                for i in range(nb_box):
+                    self.diff_boxes.pop()
+                return nb_box
+
+        elif self.diff_boxes:
             width = self.diff_boxes[-1][2] - self.diff_boxes[-1][0]
             height = self.diff_boxes[-1][3] - self.diff_boxes[-1][1]
             self.move_cursors(width, height, direction=-1)
             self.diff_boxes.pop()
+            return 1
