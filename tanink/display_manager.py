@@ -8,6 +8,7 @@ class DisplayManager:
     """ Manage the display of text on the screen.
         Place or remove text boxes and update the screen.
     """
+
     def __init__(self, display, writing_manager):
         self.display = display
         self.writing_manager = writing_manager
@@ -27,7 +28,7 @@ class DisplayManager:
         print(f"Drawing '{text}'")
         self.place.place_written_text(text)
         self.writing_buffer.append(text)
-    
+
     async def draw_buffer(self):
         while True:
             while self.diff_boxes_to_erase:
@@ -74,6 +75,7 @@ class DisplayManager:
                             max(diff_box[2], last_box[2]),
                             diff_box[3]
                         ))
-                        print("diff box to erase (else)", self.diff_boxes_to_erase)
+                        print("diff box to erase (else)",
+                              self.diff_boxes_to_erase)
                     else:
                         self.diff_boxes_to_erase.append(diff_box)

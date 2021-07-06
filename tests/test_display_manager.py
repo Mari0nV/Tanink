@@ -14,6 +14,7 @@ def test_draw_and_erase_text(display_manager):
     assert display_manager.writing_buffer == ['a']
     assert display_manager.writing_manager.x_cursor == 88
 
+
 def test_erase_nothing(display_manager):
     display_manager.erase_last_written_text()
 

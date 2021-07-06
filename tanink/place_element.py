@@ -19,6 +19,7 @@ class PlaceElement:
         self.font = ImageFont.truetype(cfg.FONTPATH, self.font_size)
         self.transpose = cfg.TRANSPOSE
 
+        self.written_text = ""
         self.last_word = ""
         self.word_delimiter = "[\\.,;\\-: ]"
 
@@ -60,14 +61,16 @@ class PlaceElement:
             if self.writing_manager.no_more_space(width) and not re.match(self.word_delimiter, character):
                 if index == 0:
                     # move the content of last word + text down
-                    last_word_width = self.font.getsize(self.last_word)
+                    last_word_width = self.font.getsize(self.last_word)[0]
+                    text_width = self.font.getsize(text)[0]
+                    word = self.last_word + text
                     self.place_blank_text_box(last_word_width)
-                    total_width = self.font.getsize(self.last_word + text)
-                    self.writing_manager.move_cursors(
-                        total_width, self.font_size, new_row=True)
+                    total_width = last_word_width + text_width
+                    self.writing_manager.move_cursors(  # TODO should be divided into multiple diff boxes
+                        total_width, self.font_size, new_row=True, nb_box=len(word))
                     draw_x, draw_y = self._compute_drawing_box(total_width)
                     img = self._create_image(
-                        total_width, self.font_size, self.last_word + text)
+                        total_width, self.font_size, word)
                     self.display.frame_buf.paste(img, (draw_x, draw_y))
 
     def _compute_drawing_box(self, width=None, forward=True):
@@ -118,24 +121,25 @@ class PlaceElement:
     def place_blank_text_box(self, width=None):
         """ Erase last written text box
         """
+        diff_box = None
         if width:
-            nb_box = self.writing_manager.pop_diff_box(width)
+            diff_box, nb_box = self.writing_manager.pop_diff_box(width)
             draw_x, draw_y = self._compute_drawing_box(width, forward=False)
             height = self.font_size
         else:
             nb_box = 1
-            diff_box = self.writing_manager.get_diff_box()
-            if diff_box:
+            diff_box, _ = self.writing_manager.pop_diff_box()
+            if diff_box is not None:
                 width = diff_box[2] - diff_box[0]
                 height = diff_box[3] - diff_box[1]
-                self.writing_manager.pop_diff_box()
                 draw_x, draw_y = self._compute_drawing_box(forward=False)
             else:
                 return
 
-        self._update_last_word(nb_box=nb_box)
-        img = self._create_image(width, height)
-        self.display.frame_buf.paste(img, (draw_x, draw_y))
+        if diff_box is not None:
+            self._update_last_word(nb_box=nb_box)
+            img = self._create_image(width, height)
+            self.display.frame_buf.paste(img, (draw_x, draw_y))
 
         return diff_box
 

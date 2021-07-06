@@ -40,3 +40,20 @@ def test_that_text_has_new_word(place_element, last_word, text, result):
     place_element.last_word = last_word
 
     assert place_element._has_new_word(text) == result
+
+
+# def test_move_word_on_new_row(
+#     place_element, writing_manager
+# ):
+#     writing_manager.diff_boxes = [
+#         (52, 8, 72, 40),
+#         (32, 8, 52, 40),
+#         (12, 8, 32, 40)
+#     ]
+#     writing_manager.x_cursor = 12
+#     writing_manager.y_cursor = 8
+#     place_element.last_word = 'a'
+
+#     place_element.move_word_on_new_row('b')
+
+#     assert writing_manager.get_cursors() == 68, 40
