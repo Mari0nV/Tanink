@@ -11,9 +11,9 @@ class PlaceElement:
         - writing box (big rectangle box)
     """
 
-    def __init__(self, display, writing_manager):
+    def __init__(self, display, diffbox_manager):
         self.display = display
-        self.writing_manager = writing_manager
+        self.diffbox_manager = diffbox_manager
 
         self.font_size = cfg.FONTSIZE
         self.font = ImageFont.truetype(cfg.FONTPATH, self.font_size)
@@ -22,6 +22,7 @@ class PlaceElement:
         self.written_text = ""
         self.last_word = ""
         self.word_delimiter = "[\\.,;\\-: ]"
+        self.box_to_update = None
 
     def _update_last_word(self, text=None, nb_box=1):
         """ Update last word:
@@ -58,7 +59,7 @@ class PlaceElement:
         """
         for index, character in enumerate(text):
             width, _ = self.font.getsize(character)
-            if self.writing_manager.no_more_space(width) and not re.match(self.word_delimiter, character):
+            if self.diffbox_manager.no_more_space(width) and not re.match(self.word_delimiter, character):
                 if index == 0:
                     # move the content of last word + text down
                     last_word_width = self.font.getsize(self.last_word)[0]
@@ -66,28 +67,31 @@ class PlaceElement:
                     word = self.last_word + text
                     self.place_blank_text_box(last_word_width)
                     total_width = last_word_width + text_width
-                    self.writing_manager.move_cursors(  # TODO should be divided into multiple diff boxes
-                        total_width, self.font_size, new_row=True, nb_box=len(word))
-                    draw_x, draw_y = self._compute_drawing_box(total_width)
+                    self.diffbox_manager.move_cursors(
+                        total_width, new_row=True, nb_box=len(word))
+                    draw_x, draw_y = self._compute_drawing_box(new_row=True)
                     img = self._create_image(
                         total_width, self.font_size, word)
                     self.display.frame_buf.paste(img, (draw_x, draw_y))
+                    self.box_to_update = self.diffbox_manager.get_row_diff_box(nb_rows=2)
 
-    def _compute_drawing_box(self, width=None, forward=True):
-        if forward:  # cursor is after the character that has just been added
+    def _compute_drawing_box(self, forward=True, new_row=False):
+        if new_row:
+            draw_x, draw_y = self.diffbox_manager.get_row_start_cursors()
+        elif forward:  # cursor is after the character that has just been added
             if self.transpose:
                 # drawing box starts at cursors after they move
-                draw_x, draw_y = self.writing_manager.get_cursors()
+                draw_x, draw_y = self.diffbox_manager.get_cursors()
             else:
                 # drawing box starts at cursors before they move
-                draw_x, draw_y = self.writing_manager.get_prev_cursors()
-        else:  # cursors is before the blank box that has just been added
+                draw_x, draw_y = self.diffbox_manager.get_prev_cursors()
+        else:  # cursor is before the blank box that has just been added
             if self.transpose:
                 # drawing box starts at cursors before they move
-                draw_x, draw_y = self.writing_manager.get_prev_cursors()
+                draw_x, draw_y = self.diffbox_manager.get_prev_cursors()
             else:
                 # drawing box starts at cursors after they move
-                draw_x, draw_y = self.writing_manager.get_cursors()
+                draw_x, draw_y = self.diffbox_manager.get_cursors()
 
         return draw_x, draw_y
 
@@ -107,12 +111,12 @@ class PlaceElement:
         text_width, _ = self.font.getsize(text)
         text_height = self.font_size
 
-        if self.writing_manager.no_more_space(text_width) and not self._has_new_word(text):
+        if self.diffbox_manager.no_more_space(text_width) and not self._has_new_word(text):
             self.move_word_on_new_row(text)
             return
 
         self._update_last_word(text)
-        self.writing_manager.move_cursors(text_width, text_height)
+        self.diffbox_manager.move_cursors(text_width)
         draw_x, draw_y = self._compute_drawing_box()
         img = self._create_image(text_width, text_height, text)
 
@@ -120,23 +124,22 @@ class PlaceElement:
 
     def place_blank_text_box(self, width=None):
         """ Erase last written text box
+            Return the diff_box containing this text.
         """
         diff_box = None
         if width:
-            diff_box, nb_box = self.writing_manager.pop_diff_box(width)
-            draw_x, draw_y = self._compute_drawing_box(width, forward=False)
+            diff_box, nb_box = self.diffbox_manager.pop_diff_box(width)
             height = self.font_size
         else:
             nb_box = 1
-            diff_box, _ = self.writing_manager.pop_diff_box()
+            diff_box, _ = self.diffbox_manager.pop_diff_box()
             if diff_box is not None:
                 width = diff_box[2] - diff_box[0]
                 height = diff_box[3] - diff_box[1]
-                draw_x, draw_y = self._compute_drawing_box(forward=False)
-            else:
-                return
 
         if diff_box is not None:
+            draw_x = min(diff_box[0], diff_box[2])
+            draw_y = self.diffbox_manager.y_cursor
             self._update_last_word(nb_box=nb_box)
             img = self._create_image(width, height)
             self.display.frame_buf.paste(img, (draw_x, draw_y))

@@ -20,6 +20,7 @@ def diffbox_manager():
     manager.x_cursor = 108
     manager.y_cursor = 8
     manager.fontsize = 30
+    manager.row_index = 0
 
     return manager
 
@@ -29,7 +30,7 @@ def place_element(mocker, diffbox_manager):
     display = mocker.Mock()
     place = PlaceElement(
         display=display,
-        writing_manager=diffbox_manager
+        diffbox_manager=diffbox_manager
     )
     font_path = os.path.join(
         os.path.dirname(__file__),
@@ -47,7 +48,7 @@ def display_manager(mocker, place_element):
     display = mocker.Mock()
     manager = DisplayManager(
         display=display,
-        writing_manager=place_element.writing_manager
+        diffbox_manager=place_element.diffbox_manager
     )
     manager.place = place_element
     return manager

@@ -190,3 +190,19 @@ def test_get_row_diff_box(diffbox_manager, nb_rows, expected_diff_box):
     diffbox_manager.row_index = 1
 
     assert diffbox_manager.get_row_diff_box(nb_rows) == expected_diff_box
+
+
+def test_set_row_index(diffbox_manager):
+    assert diffbox_manager.row_index == 0  # checking initialization value
+
+    diffbox_manager.move_cursors(100)
+
+    assert diffbox_manager.row_index == 0  # still on same row
+
+    diffbox_manager.move_cursors(100)
+
+    assert diffbox_manager.row_index == 1  # change of row
+
+    diffbox_manager.move_cursors(100)
+
+    assert diffbox_manager.row_index == 2  # change of row

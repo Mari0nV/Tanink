@@ -9,12 +9,12 @@ class DisplayManager:
         Place or remove text boxes and update the screen.
     """
 
-    def __init__(self, display, writing_manager):
+    def __init__(self, display, diffbox_manager):
         self.display = display
-        self.writing_manager = writing_manager
+        self.diffbox_manager = diffbox_manager
         self.place = PlaceElement(
             display=display,
-            writing_manager=writing_manager
+            diffbox_manager=diffbox_manager
         )
 
         self.writing_buffer = []
@@ -41,13 +41,16 @@ class DisplayManager:
             if self.writing_buffer:
                 text = ''.join(self.writing_buffer)
                 self.writing_buffer = []
-
-                print("before draw partial")
-                await self.display.draw_partial(
-                    constants.DisplayModes.DU,
-                    diff_box=self.writing_manager.get_diff_box(
+                if self.place.box_to_update:  # multiple lines to update (a word has been moved)
+                    diff_box = self.place.box_to_update
+                else:
+                    diff_box = self.diffbox_manager.get_diff_box(
                         size=len(text)
                     )
+                print("diffbox to update", diff_box)
+                await self.display.draw_partial(
+                    constants.DisplayModes.DU,
+                    diff_box=diff_box
                 )
 
             else:
@@ -58,7 +61,7 @@ class DisplayManager:
         if self.writing_buffer:
             print("buffer", self.writing_buffer)
             self.writing_buffer.pop()
-            self.writing_manager.pop_diff_box()
+            self.diffbox_manager.pop_diff_box()
         else:
             diff_box = self.place.place_blank_text_box()
             if diff_box:
