@@ -4,13 +4,13 @@ import os
 
 from tanink.display_manager import DisplayManager
 from tanink.place_element import PlaceElement
-from tanink.writing_manager import WritingManager
+from tanink.diffbox_manager import DiffBoxManager
 import config as cfg
 
 
 @pytest.fixture
-def writing_manager():
-    manager = WritingManager(transpose=True)
+def diffbox_manager():
+    manager = DiffBoxManager(transpose=True)
     manager.rect_x = 8
     manager.rect_y = 8
     manager.rect_width = 100
@@ -19,16 +19,17 @@ def writing_manager():
     manager.text_spacing = 0
     manager.x_cursor = 108
     manager.y_cursor = 8
+    manager.fontsize = 30
 
     return manager
 
 
 @pytest.fixture
-def place_element(mocker, writing_manager):
+def place_element(mocker, diffbox_manager):
     display = mocker.Mock()
     place = PlaceElement(
         display=display,
-        writing_manager=writing_manager
+        writing_manager=diffbox_manager
     )
     font_path = os.path.join(
         os.path.dirname(__file__),
