@@ -73,25 +73,28 @@ class PlaceElement:
                     img = self._create_image(
                         total_width, self.font_size, word)
                     self.display.frame_buf.paste(img, (draw_x, draw_y))
-                    self.box_to_update = self.diffbox_manager.get_row_diff_box(nb_rows=2)
+                    self.box_to_update = self.diffbox_manager.get_row_diff_box(
+                        nb_rows=2)
 
     def _compute_drawing_box(self, forward=True, new_row=False):
         if new_row:
             draw_x, draw_y = self.diffbox_manager.get_row_start_cursors()
         elif forward:  # cursor is after the character that has just been added
+            draw_y = self.diffbox_manager.y_cursor
             if self.transpose:
                 # drawing box starts at cursors after they move
-                draw_x, draw_y = self.diffbox_manager.get_cursors()
+                draw_x = self.diffbox_manager.x_cursor
             else:
                 # drawing box starts at cursors before they move
-                draw_x, draw_y = self.diffbox_manager.get_prev_cursors()
+                draw_x = self.diffbox_manager.prev_x_cursor
+                # draw_x, draw_y = self.diffbox_manager.get_prev_cursors()
         else:  # cursor is before the blank box that has just been added
             if self.transpose:
                 # drawing box starts at cursors before they move
-                draw_x, draw_y = self.diffbox_manager.get_prev_cursors()
+                draw_x = self.diffbox_manager.prev_x_cursor
             else:
                 # drawing box starts at cursors after they move
-                draw_x, draw_y = self.diffbox_manager.get_cursors()
+                draw_x = self.diffbox_manager.x_cursor
 
         return draw_x, draw_y
 
@@ -129,6 +132,8 @@ class PlaceElement:
         diff_box = None
         if width:
             diff_box, nb_box = self.diffbox_manager.pop_diff_box(width)
+            # replacing width with rounded width
+            width = diff_box[2] - diff_box[0]
             height = self.font_size
         else:
             nb_box = 1
