@@ -30,7 +30,7 @@ class DiffBoxManager:
     @property
     def y_cursor(self):
         return self._y_cursor
-    
+
     @y_cursor.setter
     def y_cursor(self, value):
         self.prev_y_cursor = self._y_cursor
@@ -44,7 +44,7 @@ class DiffBoxManager:
     @property
     def x_cursor(self):
         return self._x_cursor
-    
+
     @x_cursor.setter
     def x_cursor(self, value):
         self.prev_x_cursor = self._x_cursor
@@ -53,13 +53,13 @@ class DiffBoxManager:
     @property
     def fontsize(self):
         return self._fontsize
-    
+
     @fontsize.setter
     def fontsize(self, value):
         self._fontsize = value
         self.rounded_fontsize = self._round_to(value)
         self.row_height = self.rounded_fontsize + self.text_spacing
-    
+
     def get_x_cursor_start(self):
         """ Return x cursor value at row start.
             This value depends on the coordinate system (given by the transpose variable)
@@ -92,12 +92,13 @@ class DiffBoxManager:
                 self._add_diff_box()
             elif self.diff_boxes:  # user wants to go back
                 # there is space to go back staying on the same row
-                if self.get_x_cursor_start() - self.x_cursor >= (-1)**(int(self.transpose) + 1) * width:
+                if abs(self.get_x_cursor_start() - self.x_cursor) >= abs((-1)**(int(self.transpose) + 1) * width):
                     self.x_cursor += (-1)**(int(self.transpose) + 1) * width
                 # we need to go back on last row
                 elif self.y_cursor > self.rect_y + self.rect_margin:
                     self.y_cursor -= self.row_height
-                    self.x_cursor = self.diff_boxes[-2][2 * int(not self.transpose)]
+                    self.x_cursor = self.diff_boxes[-2][2 *
+                                                        int(not self.transpose)]
 
     def _round_to(self, value, round_to=4, nb_box=1):
         """ Round a value to be a multiple of 4.
@@ -129,17 +130,19 @@ class DiffBoxManager:
 
     def get_prev_cursors(self):
         return self.prev_x_cursor, self.prev_y_cursor
-    
+
     def get_row_start_cursors(self):
         """ Get the coordinates of the start of current row.
             Useful to compute large diff boxes to update.
         """
         return self.get_x_cursor_start(), self.y_cursor
-    
+
     def get_row_diff_box(self, nb_rows=1):
         if nb_rows:
             x_start = self.get_x_cursor_start()
-            x_end = self.rect_x + self.rect_width * int(not self.transpose) - self.rect_margin * (-1)**int(self.transpose)
+            x_end = self.rect_x + self.rect_width * \
+                int(not self.transpose) - self.rect_margin * \
+                (-1)**int(self.transpose)
             if x_start > x_end:
                 x_start, x_end = x_end, x_start
             y_end = self.y_cursor + self.row_height
