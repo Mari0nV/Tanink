@@ -41,8 +41,10 @@ class DisplayManager:
             if self.writing_buffer:
                 text = ''.join(self.writing_buffer)
                 self.writing_buffer = []
-                if self.place.box_to_update:  # multiple lines to update (a word has been moved)
+                # multiple lines to update (a word has been moved)
+                if self.place.box_to_update:
                     diff_box = self.place.box_to_update
+                    self.place.box_to_update = None
                 else:
                     diff_box = self.diffbox_manager.get_diff_box(
                         size=len(text)
@@ -59,7 +61,6 @@ class DisplayManager:
     def erase_last_written_text(self):
         print("Erasing last written text")
         if self.writing_buffer:
-            print("buffer", self.writing_buffer)
             self.writing_buffer.pop()
             self.diffbox_manager.pop_diff_box()
         else:
@@ -67,7 +68,6 @@ class DisplayManager:
             if diff_box:
                 if not self.diff_boxes_to_erase:
                     self.diff_boxes_to_erase.append(diff_box)
-                    print("diff box to erase (if)", self.diff_boxes_to_erase)
                 else:
                     last_box = self.diff_boxes_to_erase[-1]
                     if diff_box[1] == last_box[1]:  # boxes on same row
@@ -78,7 +78,5 @@ class DisplayManager:
                             max(diff_box[2], last_box[2]),
                             diff_box[3]
                         ))
-                        print("diff box to erase (else)",
-                              self.diff_boxes_to_erase)
                     else:
                         self.diff_boxes_to_erase.append(diff_box)
