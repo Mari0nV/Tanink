@@ -7,8 +7,9 @@ special_keys = [
     'ctrl droite', 'windows gauche'
 ]
 
+
 class KeyboardManager:
-    """ Manage keyboard input. 
+    """ Manage keyboard input.
         Associate each key pressed with its corresponding action,
         like writing a character or erasing it.
     """
@@ -16,7 +17,7 @@ class KeyboardManager:
         self.display_manager = display_manager
         self.events = Queue()
         keyboard.start_recording(self.events)
- 
+
     def check_key_pressed(self):
         while not self.events.empty():
             key = self.events.get_nowait()
@@ -25,11 +26,11 @@ class KeyboardManager:
                     self.handle_special(key.name)
                 elif not keyboard.is_modifier(key.name):
                     self.display_manager.draw_written_text(key.name)
-    
+
     def handle_special(self, name):
         try:
             getattr(self, f'_{name}')()
-        except AttributeError as e:
+        except AttributeError:
             print("No method implemented for", name)
 
     def _backspace(self):
@@ -37,4 +38,3 @@ class KeyboardManager:
 
     def _space(self):
         self.display_manager.draw_written_text(' ')
-
