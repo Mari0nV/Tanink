@@ -1,6 +1,6 @@
 from math import ceil
 
-import config as cfg
+import tanink.config as cfg
 
 
 class DiffBoxManager:

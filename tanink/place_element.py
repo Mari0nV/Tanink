@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 import re
 
-import config as cfg
+import tanink.config as cfg
 
 
 class PlaceElement:
