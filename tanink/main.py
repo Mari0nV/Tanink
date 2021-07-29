@@ -1,6 +1,7 @@
 import asyncio
 from IT8951.display import VirtualEPDDisplay
 
+from tanink.chapter import Chapter
 from tanink.display_manager import DisplayManager
 from tanink.keyboard_manager import KeyboardManager
 from tanink.diffbox_manager import DiffBoxManager
@@ -18,9 +19,11 @@ async def tasks(loop):
     await asyncio.create_task(display.clear())
 
     diffbox_manager = DiffBoxManager()
+    chapter = Chapter(id=0)
     display_manager = DisplayManager(
         display=display,
-        diffbox_manager=diffbox_manager
+        diffbox_manager=diffbox_manager,
+        chapter=chapter
     )
 
     # Display writing box
