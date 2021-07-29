@@ -5,7 +5,7 @@ import os
 from tanink.display_manager import DisplayManager
 from tanink.place_element import PlaceElement
 from tanink.diffbox_manager import DiffBoxManager
-import config as cfg
+from tanink.chapter import Chapter
 
 
 @pytest.fixture
@@ -48,7 +48,8 @@ def display_manager(mocker, place_element):
     display = mocker.Mock()
     manager = DisplayManager(
         display=display,
-        diffbox_manager=place_element.diffbox_manager
+        diffbox_manager=place_element.diffbox_manager,
+        chapter=Chapter(id=0)
     )
     manager.place = place_element
     return manager

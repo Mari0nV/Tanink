@@ -9,7 +9,7 @@ class Chapter:
 
     def add_text(self, text):
         self.text += text
-    
+
     def save(self):
         filepath = os.environ.join(
             os.path.dirname(__name__),
@@ -21,3 +21,6 @@ class Chapter:
             json.dump({
                 "text": self.text
             })
+
+    def erase_last(self):
+        self.text = self.text[:-1]

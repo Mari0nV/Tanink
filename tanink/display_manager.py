@@ -9,13 +9,14 @@ class DisplayManager:
         Place or remove text boxes and update the screen.
     """
 
-    def __init__(self, display, diffbox_manager):
+    def __init__(self, display, diffbox_manager, chapter):
         self.display = display
         self.diffbox_manager = diffbox_manager
         self.place = PlaceElement(
             display=display,
             diffbox_manager=diffbox_manager
         )
+        self.chapter = chapter
 
         self.writing_buffer = []
         self.diff_boxes_to_erase = []
@@ -28,6 +29,7 @@ class DisplayManager:
         print(f"Drawing '{text}'")
         self.place.place_written_text(text)
         self.writing_buffer.append(text)
+        self.chapter.add_text(text)
 
     async def draw_buffer(self):
         while True:
@@ -59,7 +61,7 @@ class DisplayManager:
                 await asyncio.sleep(0.01)
 
     def erase_last_written_text(self):
-        print("Erasing last written text")
+        self.chapter.erase_last()
         if self.writing_buffer:
             self.writing_buffer.pop()
             self.diffbox_manager.pop_diff_box()
