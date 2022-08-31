@@ -97,7 +97,6 @@ class DisplayManager:
                 text = ''.join(self.writing_buffer)
                 self.writing_buffer = []
 
-                print("before draw partial")
                 await self.display.draw_partial(
                     constants.DisplayModes.DU,
                     diff_box=self.writing_manager.get_diff_box(
